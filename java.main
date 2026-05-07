@@ -1,0 +1,175 @@
+import java.io.*;
+import java.util.Scanner;
+import java.util.ArrayList;
+
+class User {
+    Scanner sc = new Scanner(System.in);
+    String usuario;
+    String senha;
+
+    public void cadastro() throws Exception {
+        Boolean t1 = true;
+        String nome;
+        String senha;
+        try {
+            File f2 = new File("user.txt");
+            BufferedReader br = new BufferedReader(new FileReader("user.txt"));
+            File f = new File("senha.txt");
+            if (f.exists() && f2.exists()) {
+                t1 = true;
+                System.out.println("digite seu user");
+                nome = sc.nextLine();
+                System.out.println("digite sua senha");
+                senha = sc.nextLine();
+                String linha;
+                while ((linha = br.readLine()) != null) {
+                    if (nome.equals(linha)) {
+                        System.out.println("usuario ja existente tente novamente");
+                        t1= false;
+                        break;
+                        }
+                    }
+                }else {
+                    throw new Exception ("erro ao importa arquivos");
+                }
+                    if(t1!=false){
+                        //tava fazendo dentro do while so q percebi q ia repetir o nome errado varias vezes
+                            FileWriter fw = new FileWriter("user.txt",true);
+                            fw.write(nome+ System.lineSeparator());
+                            fw.close();
+                            FileWriter fw2= new FileWriter("senha.txt",true);
+                            fw2.write(senha+System.lineSeparator());
+                            fw2.close();
+                    }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    public void login(){
+        System.out.println("___________________");
+        System.out.println("digite seu user");
+        String user = sc.nextLine();
+        System.out.println("digite sua senha");
+        String senha = sc.nextLine();
+        Boolean login=false;
+        try{
+            BufferedReader brUser = new BufferedReader(new FileReader("user.txt"));
+            BufferedReader brSenha = new BufferedReader(new FileReader("senha.txt"));
+            String linha;
+            String linha2;
+            while((linha=brUser.readLine())!=null){
+                linha2 = brSenha.readLine();
+                if(linha.equals(user) && linha2.equals(senha)){
+                    login=true;
+                    break;
+                }
+            }if(login==true){
+                System.out.println("seja bem vindo: " + user);
+                Chat c = new Chat();
+                c.chat(user);
+            }else{
+                System.out.println("senha ou usuario invalido");
+            }
+        }catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+}
+
+class Service {
+    public void menu(){
+        Scanner sc = new Scanner(System.in);
+        int op=1;
+        User u = new User();
+        while(op!=0){
+            System.out.println("1 para cadastro");
+            System.out.println("2 para login");
+            System.out.println("0 para sair");
+            op = sc.nextInt();
+            sc.nextLine();
+            if(op>2 || op<0){
+                System.out.println("numero invalido");
+            }
+            switch(op){
+                case 1: try{
+                    u.cadastro();
+                }catch(Exception e){
+                    System.out.println(e.getMessage());
+                }
+                break;
+                case 2: u.login();
+                break;
+            }
+        }
+    }
+}
+
+class Historico{
+    static ArrayList<String> lista = new ArrayList<>();
+    String remetente;
+    String destinatario;
+    String mensagem;
+    public Historico(String r,String d,String m){
+        this.remetente=r;
+        this.destinatario=d;
+        this.mensagem=m;
+        lista.add(remetente+" , "+mensagem+ " , "+destinatario);
+    }
+    public void listarhistorico(String nome){
+        for(String h:lista){
+            if(h.contains(nome)){
+                System.out.println(h);
+            }
+        }
+    }
+}
+
+class Chat{
+    
+    Scanner sc = new Scanner(System.in);
+    public void chat(String nome){
+        try{
+        String user = nome;
+        int op=3;
+        limparconsole();
+        boolean existe=false;
+        
+        while(op!=0){
+            BufferedReader br = new BufferedReader(new FileReader("user.txt"));
+            System.out.println("digite para quem voce quer mandar mensagem ");
+            String nome2 = sc.nextLine();
+            String linha;
+            while((linha = br.readLine())!=null){
+                if(linha.equals(nome2)){
+                    existe = true;
+                }
+                System.out.println("digite oq vc quer enviar");
+                String mensagem = sc.nextLine();
+                Historico h = new Historico(user,mensagem,nome2);
+                System.out.println("digite 0 para sair");
+                System.out.println("digite 1 para ver historico de mensagens");
+                System.out.println("digite 2 para continuar");
+                op = sc.nextInt();
+                sc.nextLine();
+                if(op==1){
+                    h.listarhistorico(user);
+                }
+        }
+            }
+        }catch(Exception e){
+            System.out.println("erro no chat");
+        }
+    }
+    public void limparconsole(){
+        for(int i=0;i<50;++i){
+            System.out.println(" ");
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Service s = new Service();
+        s.menu();
+    }
